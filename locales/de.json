@@ -1,7 +1,6 @@
 {
     "op_mode": "Access Point Modus",
     "bssid": "BSSID",
-    "bssid_alias": "Zugriffspunkt",
     "channel": "Kanal",
     "extrssi": "Externes RSSI",
     "lasttxrate": "Letzte Übertragungsrate",
@@ -80,8 +79,6 @@
     "private_mac_mode_user": "Private MAC Benutzereinstellung",
     "private_mac_mode_user_updated": "Private MAC Benutzereinstellung aktualisiert",
     "private_mac_eval_at": "Private MAC ausgewertet",
-    "ap_aliases": "Zugriffspunkte",
-    "no_ap_aliases": "Keine Zugriffspunkte",
     "snr_widget": {
         "title": "WiFi Signalqualität",
         "tooltip": "Verteilung der WiFi-Signalqualität basierend auf SNR",

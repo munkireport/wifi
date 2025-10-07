@@ -1,0 +1,24 @@
+type: button
+widget_id: wifi-snr-widget
+api_url: /module/wifi/get_snr_stats
+i18n_title: wifi.state
+icon: fa-wifi
+listing_link: /show/listing/wifi/wifi
+i18n_empty_result: no-data
+buttons:
+  - label: poor
+    i18n_label: wifi.snr_widget.poor
+    class: btn-danger 
+    search_component: snr<20
+  - label: fair
+    i18n_label: wifi.snr_widget.fair
+    class: btn-warning 
+    search_component: snr>=20,<25
+  - label: good
+    i18n_label: wifi.snr_widget.good
+    class: btn-info 
+    search_component: snr>=25,<30
+  - label: excellent
+    i18n_label: wifi.snr_widget.excellent
+    class: btn-success
+    search_component: snr>=30

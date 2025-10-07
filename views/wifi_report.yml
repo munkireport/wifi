@@ -2,5 +2,5 @@ row1:
   wifi_state:
   wifi_security:
   wifi_snr:
+row2:
   wifi_networks:
-  wifi_bssid_aliases:

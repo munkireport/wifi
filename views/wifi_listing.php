@@ -3,20 +3,13 @@
 <div class="container">
   <div class="row">
       <div class="col-lg-12">
-          <h3>
-              <span data-i18n="wifi.report"></span> 
-              <span id="total-count" class='label label-primary'>…</span>
-              <?php if (conf('auth_secure') && $_SESSION['role'] == 'admin'): ?>
-              <button class="btn btn-sm btn-primary" id="force-update" style="margin-left: 10px;">Update BSSID Aliases</button>
-              <?php endif; ?>
-          </h3>
+          <h3><span data-i18n="wifi.report"></span> <span id="total-count" class='label label-primary'>…</span></h3>
           <table class="table table-striped table-condensed table-bordered">
             <thead>
               <tr>
                   <th data-i18n="listing.computername" data-colname='machine.computer_name'></th>
                   <th data-i18n="serial" data-colname='reportdata.serial_number'></th>
                   <th data-colname='wifi.ssid'>SSID</th>
-                  <th data-i18n="wifi.bssid_alias" data-colname='wifi.bssid_alias'></th>
                   <th data-colname='wifi.bssid'>BSSID</th>
                   <th data-i18n="wifi.state" data-colname='wifi.state'></th>
                   <th data-i18n="wifi.private_mac_address" data-colname='wifi.private_mac_address'></th>
@@ -35,7 +28,7 @@
             </thead>
             <tbody>
                 <tr>
-                    <td data-i18n="listing.loading" colspan="18" class="dataTables_empty"></td>
+                    <td data-i18n="listing.loading" colspan="17" class="dataTables_empty"></td>
                 </tr>
             </tbody>
           </table>
@@ -115,24 +108,14 @@
                 $('td:eq(0)', nRow).html(link);
 
                 // Format wifi state
-                var wifistate=$('td:eq(5)', nRow).html();
-                wifistate = wifistate == 'running' ? i18n.t('wifi.running') :
-                wifistate = wifistate == 'off' ? i18n.t('wifi.off') :
-                wifistate = wifistate == 'no wifi' ? i18n.t('wifi.no_wifi') :
-                wifistate = wifistate == 'init' ? i18n.t('wifi.init') :
-                wifistate = wifistate == 'sharing' ? i18n.t('wifi.sharing') :
-                (wifistate === 'unknown' ? i18n.t('wifi.unknown') : wifistate)
-                
-                // Apply state formatting with colored label
-                var stateClass = '';
-                if (wifistate === i18n.t('wifi.running')) {
-                    stateClass = 'success';
-                } else if (wifistate === i18n.t('wifi.off') || wifistate === i18n.t('wifi.no_wifi')) {
-                    stateClass = 'danger';
-                } else {
-                    stateClass = 'warning';
-                }
-                $('td:eq(5)', nRow).html('<span class="label label-' + stateClass + '">' + wifistate + '</span>');
+                var wifistate=$('td:eq(4)', nRow).html();
+                wifistate = wifistate == 'running' ? '<span class="label label-success">'+i18n.t('wifi.running')+'</span>' :
+                wifistate = wifistate == 'off' ? '<span class="label label-danger">'+i18n.t('wifi.off')+'</span>' :
+                wifistate = wifistate == 'no wifi' ? '<span class="label label-info">'+i18n.t('wifi.no_wifi')+'</span>' :
+                wifistate = wifistate == 'init' ? '<span class="label label-warning">'+i18n.t('wifi.init')+'</span>' :
+                wifistate = wifistate == 'sharing' ? '<span class="label label-warning">'+i18n.t('wifi.sharing')+'</span>' :
+                (wifistate === 'unknown' ? '<span class="label label-warning">'+i18n.t('wifi.unknown')+'</span>' : wifistate)
+                $('td:eq(4)', nRow).html(wifistate)
 
                 // Format Last Tx
                 var maxTx=$('td:eq(6)', nRow).html();
@@ -141,17 +124,17 @@
                 }
 
                 // Calculate signal to noise ratio
-                var snr=$('td:eq(9)', nRow).html();
-                var rssi=$('td:eq(10)', nRow).html();
-                var noise=$('td:eq(11)', nRow).html();
+                var snr=$('td:eq(8)', nRow).html();
+                var rssi=$('td:eq(9)', nRow).html();
+                var noise=$('td:eq(10)', nRow).html();
                 var snrValue = '';
-                
+
                 if (snr !== "") {
                     snrValue = parseInt(snr);
                 } else if (rssi !== "" && noise !== "") {
                     snrValue = parseInt(rssi) - parseInt(noise);
                 }
-                
+
                 // Apply SNR formatting with colored label
                 if (snrValue !== '') {
                     var snrClass = '';
@@ -164,19 +147,19 @@
                     } else {
                         snrClass = 'success';
                     }
-                    $('td:eq(9)', nRow).html('<span class="label label-' + snrClass + '" title="' + i18n.t('wifi.snr_detail') + '">' + snrValue + ' db</span>');
+                    $('td:eq(8)', nRow).html('<span class="label label-' + snrClass + '" title="' + i18n.t('wifi.snr_detail') + '">' + snrValue + ' db</span>');
                 }
 
                 // Format RSSI
-                var rssi=$('td:eq(10)', nRow).html();
-                $('td:eq(10)', nRow).html('<span title="'+i18n.t('wifi.rssi_detail')+'">'+rssi+' db</span>');
+                var rssi=$('td:eq(9)', nRow).html();
+                $('td:eq(9)', nRow).html('<span title="'+i18n.t('wifi.rssi_detail')+'">'+rssi+' db</span>');
 
                 // Format Noise
-                var noise=$('td:eq(11)', nRow).html();
-                $('td:eq(11)', nRow).html('<span title="'+i18n.t('wifi.noise_detail')+'">'+noise+' db</span>');
+                var noise=$('td:eq(10)', nRow).html();
+                $('td:eq(10)', nRow).html('<span title="'+i18n.t('wifi.noise_detail')+'">'+noise+' db</span>');
 
                 // Format Link Auth
-                var linkauth=$('td:eq(13)', nRow).html();
+                var linkauth=$('td:eq(12)', nRow).html();
                 linkauth = linkauth == 'none' ? i18n.t('wifi.none') :
                 linkauth = linkauth == '802.1x' ? i18n.t('wifi.802.1x') :
                 linkauth = linkauth == 'leap' ? i18n.t('wifi.leap') :
@@ -187,20 +170,19 @@
                 linkauth = linkauth == 'wpa2-psk' ? i18n.t('wifi.wpa2-psk') :
                 linkauth = linkauth == 'wpa3-sae' ? i18n.t('wifi.wpa3-sae') :
                 (linkauth === 'wpa2' ? i18n.t('wifi.wpa2') : linkauth)
-                $('td:eq(13)', nRow).text(linkauth)
+                $('td:eq(12)', nRow).text(linkauth)
 
                 // Format AP Mode
-                var apmode=$('td:eq(14)', nRow).html();
+                var apmode=$('td:eq(13)', nRow).html();
                 apmode = apmode == 'station' ? i18n.t('wifi.station') :
                 apmode = apmode == 'station ' ? i18n.t('wifi.station') : (apmode)
-                $('td:eq(14)', nRow).text(apmode)
+                $('td:eq(13)', nRow).text(apmode)
 
                 // Blank row if no wifi
-                var wifistate=$('td:eq(5)', nRow).html();
-                if ( wifistate.includes(i18n.t('wifi.no_wifi')) || wifistate.includes(i18n.t('wifi.off')) || wifistate.includes(i18n.t('wifi.init'))) {
-                    $('td:eq(2)', nRow).text("")
+                var wifistate=$('td:eq(4)', nRow).html();
+                if ( wifistate.includes(i18n.t('wifi.no_wifi')) || wifistate.includes(i18n.t('wifi.off')) || wifistate.includes(i18n.t('wifi.init')) || wifistate == 'no wifi' || wifistate == 'off' || wifistate == 'init') {
                     $('td:eq(3)', nRow).text("")
-                    $('td:eq(4)', nRow).text("")
+                    $('td:eq(5)', nRow).text("")
                     $('td:eq(6)', nRow).text("")
                     $('td:eq(7)', nRow).text("")
                     $('td:eq(8)', nRow).text("")
@@ -212,25 +194,8 @@
                     $('td:eq(14)', nRow).text("")
                     $('td:eq(15)', nRow).text("")
                     $('td:eq(16)', nRow).text("")
-                    $('td:eq(17)', nRow).text("")
                 }
             }
-        });
-
-        // Add click handler for the Update BSSID Aliases button
-        $('#force-update').on('click', function() {
-            $.ajax({
-                url: appUrl + '/module/wifi/force_update',
-                dataType: 'json',
-                success: function(data) {
-                    alert('Updated ' + data.updated + ' of ' + data.total + ' records with BSSID aliases');
-                    // Reload the page to see updates
-                    location.reload();
-                },
-                error: function() {
-                    alert('Error updating aliases');
-                }
-            });
         });
     });
 </script>
