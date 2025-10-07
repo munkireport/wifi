@@ -9,7 +9,6 @@ import platform
 import base64
 import plistlib
 
-sys.path.insert(0, '/usr/local/munki')
 sys.path.insert(0, '/usr/local/munkireport')
 
 from munkilib import FoundationPlist
@@ -196,9 +195,10 @@ def get_wifi_ssid():
         else:
             return False
 
-    else:
+    elif getFullDarwinVersion() < 2460:
         # Apple changed this (again) with macOS 15
         # need to use super dark magic now to get the ssid
+        # This method works from 15.0 to 15.6.1
 
         # https://snelson.us/2024/09/determining-a-macs-ssid-like-an-animal/
         cmd = ['/usr/sbin/system_profiler', 'SPAirPortDataType', '-xml', '-timeout', '8.4']
@@ -222,32 +222,33 @@ def get_wifi_ssid():
         except Exception:
             return False
 
-        # Going to save this method for later ;)
-        # plist = FoundationPlist.readPlist("/Library/Preferences/com.apple.wifi.known-networks.plist")
+    else:
+        # Fallback method for macOS 15.7 and 26+
+        plist = FoundationPlist.readPlist("/Library/Preferences/com.apple.wifi.known-networks.plist")
 
-        # ssid = ""
-        # date = ""
+        ssid = ""
+        date = ""
 
-        # for wifi in plist:
+        for wifi in plist:
 
-        #     # Check that we have the SSID in the preference file and it contains a BSSList entry
-        #     if "BSSList" in plist[wifi]:
-        #         # Process each BSS entry
-        #         for bss in plist[wifi]['BSSList']:
-        #             if 'BSSID' in bss and date == "":
-        #                 # If first check, save the date if exists and ssid
-        #                 ssid = wifi.replace('wifi.network.ssid.', "")
-        #                 if 'LastAssociatedAt' in bss:
-        #                     date = bss['LastAssociatedAt']
-        #             elif 'BSSID' in bss and 'LastAssociatedAt' in bss and bss['LastAssociatedAt'] > date:
-        #                 # Compare other bssid entries to make sure none of them are newer
-        #                 ssid = wifi.replace('wifi.network.ssid.', "")
-        #                 date = bss['LastAssociatedAt']
+            # Check that we have the SSID in the preference file and it contains a BSSList entry
+            if "BSSList" in plist[wifi]:
+                # Process each BSS entry
+                for bss in plist[wifi]['BSSList']:
+                    if 'BSSID' in bss and date == "":
+                        # If first check, save the date if exists and ssid
+                        ssid = wifi.replace('wifi.network.ssid.', "")
+                        if 'LastAssociatedAt' in bss:
+                            date = bss['LastAssociatedAt']
+                    elif 'BSSID' in bss and 'LastAssociatedAt' in bss and bss['LastAssociatedAt'] > date:
+                        # Compare other bssid entries to make sure none of them are newer
+                        ssid = wifi.replace('wifi.network.ssid.', "")
+                        date = bss['LastAssociatedAt']
 
-        # if ssid != "":
-        #     return ssid
-        # else:
-        #     return False
+        if ssid != "":
+            return ssid
+        else:
+            return False
 
 def get_wifi_bssid(ssid):
 
@@ -569,7 +570,8 @@ def string_to_time(date_time):
         return ""
     else:
         try:
-            return str(int(time.mktime(time.strptime(str(date_time).replace(" +0000", ""), '%Y-%m-%d %H:%M:%S'))))
+            return str(int(time.mktime(time.strptime(str(date_time), '%Y-%m-%d %H:%M:%S %z'))))
+            # return str(int(time.mktime(time.strptime(str(date_time).replace(" +0000", ""), '%Y-%m-%d %H:%M:%S'))))
         except Exception:
             try:
                 return str(int(time.mktime(time.strptime(str(date_time).replace(" +0000", ""), '%Y-%m-%dT%H:%M:%SZ'))))
@@ -596,6 +598,12 @@ def getDarwinVersion():
     """Returns the Darwin version."""
     darwin_version_tuple = platform.release().split('.')
     return int(darwin_version_tuple[0])
+
+def getFullDarwinVersion():
+    """Returns the Darwin version."""
+    # Catalina -> 10.15.7 -> 19.6.0 -> 1960
+    darwin_version_tuple = platform.release().replace(".","")
+    return int(darwin_version_tuple) 
 
 def format_mac_address(mac_address):
     mac_format = "{:0>2}:{:0>2}:{:0>2}:{:0>2}:{:0>2}:{:0>2}"
