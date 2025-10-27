@@ -1,7 +1,7 @@
 type: button
 widget_id: wifi-snr-widget
 api_url: /module/wifi/get_snr_stats
-i18n_title: wifi.state
+i18n_title: wifi.snr_widget.title
 icon: fa-wifi
 listing_link: /show/listing/wifi/wifi
 i18n_empty_result: no-data
