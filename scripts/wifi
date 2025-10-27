@@ -222,33 +222,45 @@ def get_wifi_ssid():
         except Exception:
             return False
 
+    # For macOS 15.7 and macOS 26 (Darwin 25+ / 26+)
     else:
-        # Fallback method for macOS 15.7 and 26+
-        plist = FoundationPlist.readPlist("/Library/Preferences/com.apple.wifi.known-networks.plist")
+        # ✅ September 2025 fix (snelson.us)
+        # Use ipconfig getsummary to retrieve SSID safely (works when wdutil redacts)
+        try:
+            subprocess.run(['/usr/sbin/ipconfig', 'setverbose', '1'], check=False)
 
-        ssid = ""
-        date = ""
+            cmd = """/usr/sbin/ipconfig getsummary en0 | awk -F ' SSID : ' '/ SSID : / {print $2}'"""
+            proc = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            (output, _) = proc.communicate()
+            ssid = output.decode("utf-8", errors="ignore").strip()
 
-        for wifi in plist:
+            subprocess.run(['/usr/sbin/ipconfig', 'setverbose', '0'], check=False)
 
-            # Check that we have the SSID in the preference file and it contains a BSSList entry
-            if "BSSList" in plist[wifi]:
-                # Process each BSS entry
-                for bss in plist[wifi]['BSSList']:
-                    if 'BSSID' in bss and date == "":
-                        # If first check, save the date if exists and ssid
-                        ssid = wifi.replace('wifi.network.ssid.', "")
-                        if 'LastAssociatedAt' in bss:
-                            date = bss['LastAssociatedAt']
-                    elif 'BSSID' in bss and 'LastAssociatedAt' in bss and bss['LastAssociatedAt'] > date:
-                        # Compare other bssid entries to make sure none of them are newer
-                        ssid = wifi.replace('wifi.network.ssid.', "")
-                        date = bss['LastAssociatedAt']
+            if ssid:
+                return ssid
+            else:
+                return False
 
-        if ssid != "":
-            return ssid
-        else:
-            return False
+        except Exception:
+            # Fallback: use known-networks plist as a last resort
+            try:
+                plist = FoundationPlist.readPlist("/Library/Preferences/com.apple.wifi.known-networks.plist")
+                ssid = ""
+                date = ""
+
+                for wifi in plist:
+                    if "BSSList" in plist[wifi]:
+                        for bss in plist[wifi]['BSSList']:
+                            if 'BSSID' in bss and date == "":
+                                ssid = wifi.replace('wifi.network.ssid.', "")
+                                if 'LastAssociatedAt' in bss:
+                                    date = bss['LastAssociatedAt']
+                            elif 'BSSID' in bss and 'LastAssociatedAt' in bss and bss['LastAssociatedAt'] > date:
+                                ssid = wifi.replace('wifi.network.ssid.', "")
+                                date = bss['LastAssociatedAt']
+                return ssid if ssid else False
+            except Exception:
+                return False
 
 def get_wifi_bssid(ssid):
 
